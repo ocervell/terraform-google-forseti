@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-variable "pubsub_project_id" {
-  description = "The project ID containing the Enforcer pubsub topic."
+output "host" {
+  description = "The external IP address of the bastion host."
+  value       = "${google_compute_instance.main.network_interface.0.access_config.0.nat_ip}"
 }
 
-variable "org_id" {
-  description = "The organization ID where logs will be exported from."
+output "port" {
+  description = "The port to use when connecting to the bastion host."
+  value       = "22"
+}
+
+output "private_key" {
+  description = "The contents of an SSH key file to use when connecting to the bastion host."
+  value       = "${tls_private_key.main.private_key_pem}"
+}
+
+output "user" {
+  description = "The user to use when connecting to the bastion host."
+  value       = "${local.user}"
 }

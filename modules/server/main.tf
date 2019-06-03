@@ -68,6 +68,22 @@ locals {
   server_bucket_roles = [
     "roles/storage.objectAdmin",
   ]
+  server_cscc_roles = [
+    "roles/securitycenter.findingsEditor",
+  ]
+  network_interface_base = {
+    private = [{
+      subnetwork_project = "${local.network_project}"
+      subnetwork         = "${var.subnetwork}"
+    }]
+
+    public = [{
+      subnetwork_project = "${local.network_project}"
+      subnetwork         = "${var.subnetwork}"
+      access_config      = ["${var.server_access_config}"]
+    }]
+  }
+  network_interface = "${local.network_interface_base[var.server_private ? "private" : "public"]}"
 }
 
 #-------------------#
@@ -215,7 +231,7 @@ data "template_file" "forseti_server_config" {
     CSCC_VIOLATIONS_ENABLED                             = "${var.cscc_violations_enabled ? "true" : "false"}"
     CSCC_SOURCE_ID                                      = "${var.cscc_source_id}"
     CLOUDSQL_ACL_VIOLATIONS_SHOULD_NOTIFY               = "${var.cloudsql_acl_violations_should_notify ? "true" : "false"}"
-    CONFIG_VALIDATOR_VIOLATIONS_SHOULD_NOTIFY           = "${var.config_validator_violations_should_notify ? "true": "true"}"
+    CONFIG_VALIDATOR_VIOLATIONS_SHOULD_NOTIFY           = "${var.config_validator_violations_should_notify ? "true": "false"}"
     BUCKETS_ACL_VIOLATIONS_SHOULD_NOTIFY                = "${var.buckets_acl_violations_should_notify ? "true" : "false"}"
     BLACKLIST_VIOLATIONS_SHOULD_NOTIFY                  = "${var.blacklist_violations_should_notify ? "true" : "false"}"
     BIGQUERY_ACL_VIOLATIONS_SHOULD_NOTIFY               = "${var.bigquery_acl_violations_should_notify ? "true" : "false"}"
@@ -273,6 +289,13 @@ resource "google_folder_iam_member" "folder_write" {
   member = "serviceAccount:${google_service_account.forseti_server.email}"
 }
 
+resource "google_organization_iam_member" "org_cscc" {
+  count  = "${var.org_id != "" && var.cscc_violations_enabled ? length(local.server_cscc_roles) : 0}"
+  role   = "${local.server_cscc_roles[count.index]}"
+  org_id = "${var.org_id}"
+  member = "serviceAccount:${google_service_account.forseti_server.email}"
+}
+
 #------------------------#
 # Forseti Firewall Rules #
 #------------------------#
@@ -321,11 +344,12 @@ resource "google_compute_firewall" "forseti-server-allow-grpc" {
   network                 = "${var.network}"
   target_service_accounts = ["${google_service_account.forseti_server.email}"]
   source_ranges           = "${var.server_grpc_allow_ranges}"
+  source_service_accounts = ["${var.client_service_account_email}"]
   priority                = "100"
 
   allow {
     protocol = "tcp"
-    ports    = ["50051"]
+    ports    = ["50051", "50052"]
   }
 
   depends_on = ["null_resource.services-dependency"]
@@ -382,29 +406,21 @@ resource "google_storage_bucket" "cai_export" {
 # Forseti server instance #
 #-------------------------#
 resource "google_compute_instance" "forseti-server" {
-  name = "${local.server_name}"
-  zone = "${local.server_zone}"
-
+  name                      = "${local.server_name}"
+  zone                      = "${local.server_zone}"
   project                   = "${var.project_id}"
   machine_type              = "${var.server_type}"
+  tags                      = "${var.server_tags}"
   allow_stopping_for_update = true
+  metadata                  = "${var.server_instance_metadata}"
+  metadata_startup_script   = "${data.template_file.forseti_server_startup_script.rendered}"
+  network_interface         = ["${local.network_interface}"]
 
   boot_disk {
     initialize_params {
       image = "${var.server_boot_image}"
     }
   }
-
-  network_interface {
-    subnetwork_project = "${local.network_project}"
-    subnetwork         = "${var.subnetwork}"
-
-    access_config {}
-  }
-
-  metadata = "${var.server_instance_metadata}"
-
-  metadata_startup_script = "${data.template_file.forseti_server_startup_script.rendered}"
 
   service_account {
     email  = "${google_service_account.forseti_server.email}"
@@ -449,7 +465,7 @@ resource "google_sql_database_instance" "master" {
 }
 
 resource "google_sql_database" "forseti-db" {
-  name     = "forseti_security"
+  name     = "${var.cloudsql_db_name}"
   project  = "${var.project_id}"
   instance = "${google_sql_database_instance.master.name}"
 }

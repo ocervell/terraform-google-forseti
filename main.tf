@@ -18,6 +18,15 @@ resource "random_id" "random_hash_suffix" {
   byte_length = 4
 }
 
+resource "null_resource" "org_id_and_folder_id_are_both_empty" {
+  count = "${var.org_id == "" && var.folder_id == "" ? 1 : 0}"
+
+  provisioner "local-exec" {
+    command     = "false"
+    interpreter = ["bash", "-c"]
+  }
+}
+
 #--------#
 # Locals #
 #--------#
@@ -41,6 +50,11 @@ locals {
     "logging.googleapis.com",
     "cloudasset.googleapis.com",
     "storage-api.googleapis.com",
+    "groupssettings.googleapis.com",
+  ]
+
+  cscc_violations_enabled_services_list = [
+    "securitycenter.googleapis.com",
   ]
 }
 
@@ -51,6 +65,13 @@ resource "google_project_service" "main" {
   count              = "${length(local.services_list)}"
   project            = "${var.project_id}"
   service            = "${local.services_list[count.index]}"
+  disable_on_destroy = "false"
+}
+
+resource "google_project_service" "cscc_violations" {
+  count              = "${var.cscc_violations_enabled ? length(local.cscc_violations_enabled_services_list) : 0}"
+  project            = "${var.project_id}"
+  service            = "${local.cscc_violations_enabled_services_list[count.index]}"
   disable_on_destroy = "false"
 }
 
@@ -72,6 +93,9 @@ module "client" {
   client_region            = "${var.client_region}"
   client_instance_metadata = "${var.client_instance_metadata}"
   client_ssh_allow_ranges  = "${var.client_ssh_allow_ranges}"
+  client_tags              = "${var.client_tags}"
+  client_access_config     = "${var.client_access_config}"
+  client_private           = "${var.client_private}"
 
   services = "${google_project_service.main.*.service}"
 }
@@ -88,9 +112,13 @@ module "server" {
   forseti_email_sender                                = "${var.forseti_email_sender}"
   forseti_home                                        = "${var.forseti_home}"
   forseti_run_frequency                               = "${var.forseti_run_frequency}"
+  client_service_account_email                        = "${module.client.forseti-client-service-account}"
   server_type                                         = "${var.server_type}"
   server_region                                       = "${var.server_region}"
   server_boot_image                                   = "${var.server_boot_image}"
+  server_tags                                         = "${var.server_tags}"
+  server_access_config                                = "${var.server_access_config}"
+  server_private                                      = "${var.server_private}"
   cloudsql_region                                     = "${var.cloudsql_region}"
   cloudsql_db_name                                    = "${var.cloudsql_db_name}"
   cloudsql_db_port                                    = "${var.cloudsql_db_port}"

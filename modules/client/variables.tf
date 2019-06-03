@@ -23,7 +23,7 @@ variable "project_id" {
 
 variable "forseti_version" {
   description = "The version of Forseti to install"
-  default     = "v2.14.1"
+  default     = "v2.16.0"
 }
 
 variable "forseti_repo_url" {
@@ -84,9 +84,26 @@ variable "client_ssh_allow_ranges" {
 }
 
 variable "client_instance_metadata" {
-  description = "Metadata key/value pairs to make available from within the client instance."
+  description = "Metadata key/value pairs to make available from within the client instance"
   type        = "map"
   default     = {}
+}
+
+variable "client_tags" {
+  description = "VM instance tags"
+  type        = "list"
+  default     = []
+}
+
+variable "client_access_config" {
+  description = "Client instance 'access_config' block"
+  type        = "map"
+  default     = {}
+}
+
+variable "client_private" {
+  description = "Enable private Forseti client VM (no public IP)"
+  default     = "false"
 }
 
 variable "suffix" {
@@ -96,5 +113,5 @@ variable "suffix" {
 variable "services" {
   description = "An artificial dependency to bypass #10462"
   type        = "list"
-  default     = [""]
+  default     = []
 }

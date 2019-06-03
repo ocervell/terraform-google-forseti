@@ -27,7 +27,7 @@ variable "gsuite_admin_email" {
 
 variable "forseti_version" {
   description = "The version of Forseti to install"
-  default     = "v2.14.1"
+  default     = "v2.16.0"
 }
 
 variable "forseti_repo_url" {
@@ -543,6 +543,27 @@ variable "server_instance_metadata" {
   default     = {}
 }
 
+variable "server_tags" {
+  description = "VM instance tags"
+  type        = "list"
+  default     = []
+}
+
+variable "server_access_config" {
+  description = "Server instance 'access_config' block"
+  type        = "map"
+  default     = {}
+}
+
+variable "server_private" {
+  description = "Enable private Forseti server VM (no public IP)"
+  default     = "false"
+}
+
+variable "client_service_account_email" {
+  description = "Service account of the forseti client"
+}
+
 #------------#
 # Forseti db #
 #------------#
@@ -610,7 +631,7 @@ variable "network_project" {
 variable "server_grpc_allow_ranges" {
   description = "List of CIDRs that will be allowed gRPC access to forseti server"
   type        = "list"
-  default     = ["10.128.0.0/9"]
+  default     = []
 }
 
 variable "server_ssh_allow_ranges" {
@@ -651,7 +672,7 @@ variable "folder_id" {
 variable "composite_root_resources" {
   description = "A list of root resources that Forseti will monitor. This supersedes the root_resource_id when set."
   type        = "list"
-  default     = [""]
+  default     = []
 }
 
 variable "sendgrid_api_key" {
@@ -666,7 +687,7 @@ variable "suffix" {
 variable "services" {
   description = "An artificial dependency to bypass #10462"
   type        = "list"
-  default     = [""]
+  default     = []
 }
 
 #---------------------------------------#

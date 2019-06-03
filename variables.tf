@@ -27,7 +27,7 @@ variable "gsuite_admin_email" {
 
 variable "forseti_version" {
   description = "The version of Forseti to install"
-  default     = "v2.14.1"
+  default     = "v2.16.0"
 }
 
 variable "forseti_repo_url" {
@@ -69,7 +69,7 @@ variable "server_region" {
 }
 
 variable "server_boot_image" {
-  description = "GCE instance image that is being used, currently Debian only support is available"
+  description = "GCE instance image that is being used, currently Ubuntu only support is available"
   default     = "ubuntu-os-cloud/ubuntu-1804-lts"
 }
 
@@ -89,6 +89,23 @@ variable "server_ssh_allow_ranges" {
   description = "List of CIDRs that will be allowed ssh access to forseti server"
   type        = "list"
   default     = ["0.0.0.0/0"]
+}
+
+variable "server_tags" {
+  description = "GCE Forseti Server VM Tags"
+  type        = "list"
+  default     = []
+}
+
+variable "server_access_config" {
+  description = "Server instance 'access_config' block"
+  type        = "map"
+  default     = {}
+}
+
+variable "server_private" {
+  description = "Private GCE Forseti Server VM (no public IP)"
+  default     = "false"
 }
 
 #---------------------------------#
@@ -614,6 +631,23 @@ variable "client_ssh_allow_ranges" {
   default     = ["0.0.0.0/0"]
 }
 
+variable "client_tags" {
+  description = "GCE Forseti Client VM Tags"
+  type        = "list"
+  default     = []
+}
+
+variable "client_access_config" {
+  description = "Client instance 'access_config' block"
+  type        = "map"
+  default     = {}
+}
+
+variable "client_private" {
+  description = "Private GCE Forseti Client VM (no public IP)"
+  default     = "false"
+}
+
 #------------#
 # Forseti db #
 #------------#
@@ -710,7 +744,7 @@ variable "folder_id" {
 variable "composite_root_resources" {
   description = "A list of root resources that Forseti will monitor. This supersedes the root_resource_id when set."
   type        = "list"
-  default     = [""]
+  default     = []
 }
 
 variable "sendgrid_api_key" {

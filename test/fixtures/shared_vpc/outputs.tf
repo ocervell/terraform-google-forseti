@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+output "bastion_host" {
+  value = "${module.bastion.host}"
+}
+
 output "project_id" {
   description = "ID of the service project"
   value       = "${var.project_id}"
@@ -34,11 +38,6 @@ output "forseti-server-vm-name" {
   value       = "${module.forseti-shared-vpc.forseti-server-vm-name}"
 }
 
-output "forseti-server-vm-public-ip" {
-  description = "Forseti Server VM public IP address"
-  value       = "${module.forseti-shared-vpc.forseti-server-vm-public-ip}"
-}
-
 output "forseti-client-vm-ip" {
   description = "Forseti Client VM private IP address"
   value       = "${module.forseti-shared-vpc.forseti-client-vm-ip}"
@@ -47,11 +46,6 @@ output "forseti-client-vm-ip" {
 output "forseti-client-vm-name" {
   description = "Forseti Client VM name"
   value       = "${module.forseti-shared-vpc.forseti-client-vm-name}"
-}
-
-output "forseti-client-vm-public-ip" {
-  description = "Forseti Client VM public IP address"
-  value       = "${module.forseti-shared-vpc.forseti-client-vm-public-ip}"
 }
 
 output "region" {

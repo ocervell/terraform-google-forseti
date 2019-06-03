@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-variable "pubsub_project_id" {
-  description = "The project ID containing the Enforcer pubsub topic."
+variable "network" {
+  description = "The name of the network in which the bastion host will be deployed."
+  type        = "string"
 }
 
-variable "org_id" {
-  description = "The organization ID where logs will be exported from."
+variable "project_id" {
+  description = "The ID of the project in which resources will be created."
+  type        = "string"
+}
+
+variable "subnetwork" {
+  description = "The name of the subnetwork in which the bastion host will be deployed."
+  type        = "string"
+}
+
+variable "zone" {
+  description = "The name of the zone in which the bastion host will be deployed."
+  type        = "string"
 }
