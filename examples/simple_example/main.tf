@@ -39,4 +39,10 @@ module "forseti-install-simple" {
   domain                   = "${var.domain}"
   client_instance_metadata = "${var.instance_metadata}"
   server_instance_metadata = "${var.instance_metadata}"
+
+  rules_path = "${path.module}/rules"
+
+  rules_files = [
+    "audit_logging_rules.yaml",
+  ]
 }

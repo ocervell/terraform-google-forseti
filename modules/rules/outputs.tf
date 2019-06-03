@@ -16,5 +16,5 @@
 
 output "files" {
   description = "A list of files that will be uploaded as Forseti rules"
-  value       = "${local.files}"
+  value       = "${local.rules_files}"
 }

@@ -192,6 +192,7 @@ variable "iam_disable_polling" {
   description = "Whether to disable polling for IAM API"
   default     = "False"
 }
+
 variable "logging_max_calls" {
   description = "Maximum calls that can be made to Logging API"
   default     = "9"
@@ -206,6 +207,7 @@ variable "logging_disable_polling" {
   description = "Whether to disable polling for Logging API"
   default     = "False"
 }
+
 variable "securitycenter_max_calls" {
   description = "Maximum calls that can be made to Security Center API"
   default     = "1"
@@ -694,4 +696,18 @@ variable "groups_settings_enabled" {
 variable "groups_settings_violations_should_notify" {
   description = "Notify for groups settings violations"
   default     = "true"
+}
+
+#---------------------#
+# Rules configuration #
+#---------------------#
+
+variable "rules_path" {
+  description = "Path to the directory containing the rules. This supersedes the default template rules directory when set."
+  default     = ""
+}
+
+variable "rules_files" {
+  description = "Set of rule filenames to sync to GCS bucket"
+  default     = []
 }

@@ -26,3 +26,14 @@ variable "org_id" {
 variable "domain" {
   description = "The domain associated with the GCP Organization ID"
 }
+
+variable "rules_path" {
+  description = "The path to the rules folder (leave empty to use default rules)"
+  default     = ""
+}
+
+variable "rules_files" {
+  description = "The name of the rule files to sync"
+  type        = "list"
+  default     = []
+}
